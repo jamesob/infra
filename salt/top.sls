@@ -1,0 +1,3 @@
+base:
+  'job-thinkpad':
+    - thinky
