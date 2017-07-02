@@ -1,0 +1,15 @@
+# gl_redis.service #######################################################################
+[Unit]
+Description=Gl_redis
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill gl_redis
+ExecStartPre=-/usr/bin/docker rm gl_redis
+ExecStartPre=/usr/bin/docker pull redis:latest
+ExecStart=/usr/bin/docker run \
+    --name gl_redis \
+    -v /data/gitlab/redis:/var/lib/redis \
+    redis:latest
+ExecStop=/usr/bin/docker stop gl_redis

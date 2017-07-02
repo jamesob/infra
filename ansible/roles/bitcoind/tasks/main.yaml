@@ -1,0 +1,18 @@
+---
+ 
+- name: Include bitcoin secrets
+  include_vars: "bitcoin-secrets.yaml"
+
+- name: Create bitcoin group
+  group: name=bitcoind state=present
+
+- name: Create bitcoin data directory
+  file: path=/data/bitcoind state=directory owner=root group=bitcoind mode=0775
+
+- name: Copy config files for systemd
+  template: src=bitcoind.service.j2 dest=/etc/systemd/system/bitcoind.service
+  notify: 
+    - reload systemd
+     
+- name: Restart bitcoind
+  service: name=bitcoind state=restarted

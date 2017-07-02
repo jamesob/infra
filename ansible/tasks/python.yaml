@@ -1,0 +1,13 @@
+---
+- name: Install deadsnakes PPA
+  apt_repository:
+    repo: 'ppa:fkrull/deadsnakes'
+  when: ansible_distribution_version|int < 17
+
+- name: Install Python 3.6
+  apt: 
+    name: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - python3.6
+    - python3.6-dev

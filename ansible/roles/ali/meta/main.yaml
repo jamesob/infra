@@ -1,0 +1,19 @@
+---
+
+dependencies:
+  - role: jdauphant.nginx
+    nginx_http_params:
+      - sendfile "on"
+      - access_log "/var/log/nginx/access.log"
+    nginx_sites:
+      router:
+        - listen 80
+        - location / {
+            proxy_pass http://127.0.0.1:8000;
+          }
+      gitlab:
+        - listen 80
+        - server_name git.cabsav.site
+        - location / {
+            proxy_pass    http://127.0.0.1:10080;
+          } 

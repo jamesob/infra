@@ -1,0 +1,39 @@
+---
+
+- name: Include bitcoin secrets
+  include_vars: "vars/bitcoin/secrets.yaml"
+
+- name: Install bitcoind service configuration
+  template:
+    dest: /etc/systemd/system/bitcoind.service
+    src: templates/bitcoin/bitcoind.service.j2
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Start the bitcoin service
+  service:
+    name: bitcoind
+    state: started
+  become: true
+
+- name: Install logs helper script
+  copy:
+    content: |
+      #!/bin/bash
+      journalctl --follow --unit bitcoind.service
+    dest: /usr/bin/bitcoin_logs
+    owner: root
+    group: root
+    mode: 0755
+ 
+- name: Install status helper script
+  copy:
+    content: |
+      #!/bin/bash
+      service bitcoind status
+    dest: /usr/bin/bitcoin_status
+    owner: root
+    group: root
+    mode: 0755 

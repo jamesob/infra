@@ -1,0 +1,21 @@
+---
+- name: System-level installations
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: yes
+      tags: packages
+
+    - include: 'tasks/python.yaml'
+    - include: 'tasks/docker.yaml'
+
+    - name: Install generally useful system packages
+      apt:
+        name: "{{ item }}"
+      with_items:
+        - htop
+        - tmux
+        - silversearcher-ag
+      tags: packages

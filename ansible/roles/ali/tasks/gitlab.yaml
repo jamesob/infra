@@ -1,0 +1,16 @@
+---
+
+# Set up gitlab
+
+- name: Include gitlab secrets
+  include_vars: "gitlab-secrets.yaml"
+
+- name: Copy config files for systemd
+  template: src={{ item }}.service.j2 dest=/etc/systemd/system/{{ item }}.service
+  with_items:
+    - 'gitlab'
+    - 'gl_postgresql'
+    - 'gl_redis'
+  notify: 
+    - reload systemd
+    - restart gitlab

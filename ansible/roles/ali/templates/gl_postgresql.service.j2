@@ -1,0 +1,19 @@
+# gl_postgresql.service #######################################################################
+[Unit]
+Description=Gl_postgresql
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill gl_postgresql
+ExecStartPre=-/usr/bin/docker rm gl_postgresql
+ExecStartPre=/usr/bin/docker pull sameersbn/postgresql:9.4-20
+ExecStart=/usr/bin/docker run \
+    --name gl_postgresql \
+    -v /data/gitlab/postgresql:/var/lib/postgresql \
+    -e "DB_EXTENSION=pg_trgm" \
+    -e "DB_NAME=gitlabhq_production" \
+    -e "DB_PASS={{ gitlab_db_password }}" \
+    -e "DB_USER=gitlab" \
+    sameersbn/postgresql:9.4-20
+ExecStop=/usr/bin/docker stop gl_postgresql

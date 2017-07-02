@@ -1,0 +1,14 @@
+---
+
+- name: restart ddclient
+  service: name=ddclient state=restarted
+
+- name: reload systemd
+  command: systemctl daemon-reload
+
+- name: restart gitlab
+  service: name={{ item }} state=started
+  with_items:
+    - gl_postgresql
+    - gl_redis
+    - gitlab

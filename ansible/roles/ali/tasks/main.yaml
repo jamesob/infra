@@ -1,0 +1,18 @@
+---
+
+- apt: name={{item}} state=present
+  with_items:
+    - htop
+    - ddclient
+    - lxd
+    - qemu-kvm 
+    - libvirt-bin 
+    - bridge-utils 
+    - virt-manager
+    - docker
+- name: ddclient configuration
+  template: src=ddclient.conf.j2 dest=/etc/ddclient.conf
+  notify:
+    - restart ddclient 
+- include: gitlab.yaml
+  tags: ['gitlab']

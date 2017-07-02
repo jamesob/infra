@@ -1,0 +1,22 @@
+# bitcoind.service #######################################################################
+[Unit]
+Description=Bitcoind
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill bitcoind
+ExecStartPre=-/usr/bin/docker rm bitcoind
+ExecStartPre=/usr/bin/docker pull jamesob/bitcoind
+ExecStart=/usr/bin/docker run \
+    --name bitcoind \
+    -p 8333:8333 \
+    -p 8332:8332 \
+    -v /data/bitcoind:/bitcoin \
+    -e "BTC_RPCUSER=btc" \
+    -e "BTC_RPCPASSWORD='{{ btc_rpcpassword }}'" \
+    jamesob/bitcoind 
+ExecStop=/usr/bin/docker stop bitcoind
+# Limit memory usage.
+MemoryAccounting=true
+MemoryLimit=3G

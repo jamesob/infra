@@ -1,0 +1,11 @@
+---
+- include: 'ubuntu.yaml'
+
+- hosts: all
+  become: true
+  tasks: 
+    - include: 'tasks/bitcoin.yaml'
+      tags: bitcoin
+
+    - include: 'tasks/postfix.yaml'
+      tags: mail

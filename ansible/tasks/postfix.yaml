@@ -1,0 +1,61 @@
+---
+- name: Include secrets
+  include_vars: "vars/postfix/secrets.yaml"
+
+- name: Set Postfix option type as internet site
+  debconf: name=postfix question="postfix/main_mailer_type" value="'Internet Site'" vtype="string"
+  tags: mail
+
+- name: Set Postfix option hostname
+  debconf: name=postifx question="postfix/mailname" value="{{postfix_fqdn}}" vtype="string"
+  tags: mail
+                         
+- name: Install postfix & co.
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - postfix
+    - mailutils
+  tags: mail   
+
+# Since Comcast blocks outgoing email on port 25, we have to configure
+# things to go through their SMTP server.
+
+- name: Configure ISP smtp credentials
+  copy:
+    content: |
+      smtp.comcast.net  {{ postfix_isp_email }}:{{ postfix_isp_password}}
+    dest: /etc/postfix/smtp_password
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Hash ISP creds
+  shell: postmap hash:/etc/postfix/smtp_password
+
+- name: Configure sender rewrite
+  copy:
+    content: |
+      /^([^@]*)@.*$/    $1@{{ postfix_fqdn }}
+    dest: /etc/postfix/sender_rewrite
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure postfix
+  lineinfile:
+    dest: /etc/postfix/main.cf
+    regexp: "{{ item.r }}"
+    line: "{{ item.l }}"
+  with_items:
+    - { r: '^relayhost ', l: 'relayhost = [smtp.comcast.net]:587' }
+    - { r: '^smtp_sasl_auth_enable ', l: 'smtp_sasl_auth_enable = yes' }
+    - { r: '^smtp_sasl_password_maps =', l: 'smtp_sasl_password_maps = hash:/etc/postfix/smtp_password' }
+    - { r: '^smtp_sasl_security_options =', l: 'smtp_sasl_security_options = noanonymous' }
+    - { r: '^smtp_sasl_tls_security_options =', l: 'smtp_sasl_tls_security_options = noanonymous' }
+    - { r: '^sender_canonical_maps =', l: 'sender_canonical_maps = regexp:/etc/postfix/sender_rewrite' }
+
+- name: Restart postfix
+  service:
+    name: postfix
+    state: restarted
